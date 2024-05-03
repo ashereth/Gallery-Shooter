@@ -180,7 +180,6 @@ class EarthInvasion extends Phaser.Scene {
                 enemy.type = 2;
                 my.sprite.enemies.unshift(enemy);
             }
-            
         }
         //  row 3 of enemies
         for (let i = 0; i < 10; i++) {
@@ -292,7 +291,7 @@ class EarthInvasion extends Phaser.Scene {
             }
         }
 
-        //check for enemies and enemy bullets colliding with player
+        //check for enemies colliding with player
         for (let i = 0; i < my.sprite.enemies.length; i++) {
             const enemy = my.sprite.enemies[i];
             if (this.collides(my.sprite.playerShip, enemy)) {
@@ -307,6 +306,7 @@ class EarthInvasion extends Phaser.Scene {
             }
         }
 
+        //check for enemy bullets colliding with player
         for (let i = 0; i < my.sprite.enemyBullet.length; i++) {
             const bullet = my.sprite.enemyBullet[i];
             if (this.collides(my.sprite.playerShip, bullet)) {
@@ -321,6 +321,7 @@ class EarthInvasion extends Phaser.Scene {
             }
         }
 
+        //have some attacking enemies shoot bullets
         for (const enemy of my.sprite.enemies) {
             //make certain attacking enemies shoot bullets
             if (enemy.isAttacking && enemy.type != 1) {
@@ -364,7 +365,7 @@ class EarthInvasion extends Phaser.Scene {
                     });
                     my.enemyPath3.splice(0, 2);
                 }
-                if (enemy.type == 2) {
+                if (enemy.type == 2) {//middle row of enemies
                     if (enemy.x>config.width/2) {
                         my.enemyPath2Left.unshift(enemy.x, enemy.y);
                         my.curve2Left = new Phaser.Curves.Spline(this.my.enemyPath2Left);
@@ -379,7 +380,6 @@ class EarthInvasion extends Phaser.Scene {
                             rotationOffset: -90
                         });
                         my.enemyPath2Left.splice(0, 2);
-
                     }else{
                         my.enemyPath2Right.unshift(enemy.x, enemy.y);
                         my.curve2Right = new Phaser.Curves.Spline(this.my.enemyPath2Right);
@@ -394,11 +394,9 @@ class EarthInvasion extends Phaser.Scene {
                             rotationOffset: -90
                         });
                         my.enemyPath2Right.splice(0, 2);
-
                     }
-                    
                 }
-                if (enemy.type == 1) {
+                if (enemy.type == 1) {//top row enemies
                     my.enemyPath1.unshift(enemy.x, enemy.y);
                     my.curve1 = new Phaser.Curves.Spline(this.my.enemyPath1);
                     enemy.x = my.curve1.points[0].x;
@@ -415,8 +413,6 @@ class EarthInvasion extends Phaser.Scene {
                 }
             }
         }
-
-
     }
     
     // A center-radius AABB collision check
