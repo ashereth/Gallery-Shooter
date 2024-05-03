@@ -1,6 +1,7 @@
 //health
-playerHealth = 3;
-earthHealth = 10;
+let playerHealth = 3;
+let earthHealth = 10;
+let level = 1;
 
 class EarthInvasion extends Phaser.Scene {
     constructor() {
@@ -209,6 +210,8 @@ class EarthInvasion extends Phaser.Scene {
             this.restartCooldown-=1;
             if (this.restartCooldown<0) {
                 //reset the paths so that the enemies follow the correct paths on restart
+                console.log("Level "+level+" complete!");
+                level+=1;
                 this.resetPaths();
                 this.scene.restart();
             }
