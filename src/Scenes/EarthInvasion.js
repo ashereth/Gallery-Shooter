@@ -1,3 +1,7 @@
+//health
+playerHealth = 3;
+earthHealth = 10;
+
 class EarthInvasion extends Phaser.Scene {
     constructor() {
         super("earthInvasion");
@@ -121,10 +125,6 @@ class EarthInvasion extends Phaser.Scene {
         this.playerSpeed = 6;
         this.playerBulletSpeed = 8;
         this.enemyBulletSpeed = 5;
-
-        //health
-        this.playerHealth = 3;
-        this.earthHealth = 10;
 
         //bullet cooldown
         this.bulletCooldown = 10;
@@ -254,8 +254,8 @@ class EarthInvasion extends Phaser.Scene {
         for (let i = 0; i < my.sprite.enemies.length; i++) {
             const enemy = my.sprite.enemies[i];
             if (enemy.y>config.height) {
-                this.earthHealth-=1;
-                console.log("earth health="+this.earthHealth);
+                earthHealth-=1;
+                console.log("earth health="+earthHealth);
                 // Remove the enemy from the enemies array
                 my.sprite.enemies.splice(i, 1); // Remove the enemy at index i from the array
                 // Destroy the enemy
@@ -293,8 +293,8 @@ class EarthInvasion extends Phaser.Scene {
         for (let i = 0; i < my.sprite.enemies.length; i++) {
             const enemy = my.sprite.enemies[i];
             if (this.collides(my.sprite.playerShip, enemy)) {
-                this.playerHealth-=1;
-                console.log("player health="+this.playerHealth);
+                playerHealth-=1;
+                console.log("player health="+playerHealth);
                 // Remove the enemy from the enemies array
                 my.sprite.enemies.splice(i, 1); // Remove the enemy at index i from the array
                 // Destroy the enemy
@@ -307,8 +307,8 @@ class EarthInvasion extends Phaser.Scene {
         for (let i = 0; i < my.sprite.enemyBullet.length; i++) {
             const bullet = my.sprite.enemyBullet[i];
             if (this.collides(my.sprite.playerShip, bullet)) {
-                this.playerHealth-=1;
-                console.log("player health="+this.playerHealth);
+                playerHealth-=1;
+                console.log("player health="+playerHealth);
                 // Remove the bullet from the array
                 my.sprite.enemyBullet.splice(i, 1); // Remove the enemy at index i from the array
                 // Destroy the bullet
