@@ -15,6 +15,10 @@ class EarthInvasion extends Phaser.Scene {
         //array to hold attacking enemies
         this.my.sprite.attackingEnemies = [];
         //paths for each enemy type
+        this.resetPaths()
+    }
+
+    resetPaths(){
         this.my.enemyPath1 = [
             716,97,
             724,299,
@@ -127,6 +131,8 @@ class EarthInvasion extends Phaser.Scene {
         //enemy movement cooldown
         this.enemyCooldown = 10;
         this.enemyBulletCooldown = 100;
+        //restart cooldown
+        this.restartCooldown = 100;
 
         //set background
         if (true) {
@@ -197,6 +203,16 @@ class EarthInvasion extends Phaser.Scene {
         this.bulletCooldown-=1;
         this.enemyCooldown-=1;
         this.enemyBulletCooldown-=1;
+
+        //check if the scene should restart
+        if (my.sprite.enemies.length<=0) {
+            this.restartCooldown-=1;
+            if (this.restartCooldown<0) {
+                //reset the paths so that the enemies follow the correct paths on restart
+                this.resetPaths();
+                this.scene.restart();
+            }
+        }
 
         // Moving left
         if (this.left.isDown) {
@@ -278,7 +294,7 @@ class EarthInvasion extends Phaser.Scene {
             const enemy = my.sprite.enemies[i];
             if (this.collides(my.sprite.playerShip, enemy)) {
                 this.playerHealth-=1;
-                console.log(this.playerHealth);
+                console.log("player health="+this.playerHealth);
                 // Remove the enemy from the enemies array
                 my.sprite.enemies.splice(i, 1); // Remove the enemy at index i from the array
                 // Destroy the enemy
@@ -343,6 +359,7 @@ class EarthInvasion extends Phaser.Scene {
                         rotateToPath: true,
                         rotationOffset: -90
                     });
+                    my.enemyPath3.splice(0, 2);
                 }
                 if (enemy.type == 2) {
                     if (enemy.x>config.width/2) {
@@ -358,6 +375,8 @@ class EarthInvasion extends Phaser.Scene {
                             rotateToPath: true,
                             rotationOffset: -90
                         });
+                        my.enemyPath2Left.splice(0, 2);
+
                     }else{
                         my.enemyPath2Right.unshift(enemy.x, enemy.y);
                         my.curve2Right = new Phaser.Curves.Spline(this.my.enemyPath2Right);
@@ -371,6 +390,8 @@ class EarthInvasion extends Phaser.Scene {
                             rotateToPath: true,
                             rotationOffset: -90
                         });
+                        my.enemyPath2Right.splice(0, 2);
+
                     }
                     
                 }
@@ -387,6 +408,7 @@ class EarthInvasion extends Phaser.Scene {
                         rotateToPath: true,
                         rotationOffset: -90
                     });
+                    my.enemyPath1.splice(0, 2);
                 }
             }
         }
