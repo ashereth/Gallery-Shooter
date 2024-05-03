@@ -116,11 +116,17 @@ class EarthInvasion extends Phaser.Scene {
         //set game speeds
         this.playerSpeed = 6;
         this.playerBulletSpeed = 8;
+        this.enemyBulletSpeed = 5;
+
+        //health
+        this.playerHealth = 3;
+        this.earthHealth = 10;
 
         //bullet cooldown
         this.bulletCooldown = 10;
         //enemy movement cooldown
         this.enemyCooldown = 10;
+        this.enemyBulletCooldown = 100;
 
         //set background
         if (true) {
@@ -148,7 +154,6 @@ class EarthInvasion extends Phaser.Scene {
             let enemy = this.add.follower(my.curve3, i*(config.width/10)+40, 30, "spaceParts", "enemyRed4.png").setScale(this.scale*.9);
             enemy.isAttacking = false;
             enemy.hasAttacked = false;
-            enemy.isActive = true;
             enemy.type = 3;
             my.sprite.enemies.unshift(enemy);
         }
@@ -159,14 +164,12 @@ class EarthInvasion extends Phaser.Scene {
                 let enemy = this.add.follower(my.curve2Right,i*(config.width/10)+40, 80, "spaceParts", "enemyRed1.png").setScale(this.scale*.9);
                 enemy.isAttacking = false;
                 enemy.hasAttacked = false;
-                enemy.isActive = true;
                 enemy.type = 2;
                 my.sprite.enemies.unshift(enemy);
             }else {
                 let enemy = this.add.follower(my.curve2Left,i*(config.width/10)+40, 80, "spaceParts", "enemyRed1.png").setScale(this.scale*.9);
                 enemy.isAttacking = false;
                 enemy.hasAttacked = false;
-                enemy.isActive = true;
                 enemy.type = 2;
                 my.sprite.enemies.unshift(enemy);
             }
@@ -177,7 +180,6 @@ class EarthInvasion extends Phaser.Scene {
             let enemy = this.add.follower(my.curve1,i*(config.width/10)+40, 130, "spaceParts", "enemyRed2.png").setScale(this.scale*.9);
             enemy.isAttacking = false;
             enemy.hasAttacked = false;
-            enemy.isActive = true;
             enemy.type = 1;
             my.sprite.enemies.unshift(enemy);
         }
@@ -194,6 +196,7 @@ class EarthInvasion extends Phaser.Scene {
         //update cooldowns every tick
         this.bulletCooldown-=1;
         this.enemyCooldown-=1;
+        this.enemyBulletCooldown-=1;
 
         // Moving left
         if (this.left.isDown) {
@@ -226,33 +229,97 @@ class EarthInvasion extends Phaser.Scene {
         for (let bullet of my.sprite.playerBullet) {
             bullet.y -= this.playerBulletSpeed;
         }
+        // Make all of the bullets move
+        for (let bullet of my.sprite.enemyBullet) {
+            bullet.y += this.enemyBulletSpeed;
+        }
 
-        //remove any bullets and enemies that have gone offscreen
+        //check if any enemies have made it to the bottom of the screen
+        for (let i = 0; i < my.sprite.enemies.length; i++) {
+            const enemy = my.sprite.enemies[i];
+            if (enemy.y>config.height) {
+                this.earthHealth-=1;
+                console.log("earth health="+this.earthHealth);
+                // Remove the enemy from the enemies array
+                my.sprite.enemies.splice(i, 1); // Remove the enemy at index i from the array
+                // Destroy the enemy
+                enemy.destroy();
+                // Decrement i since we removed an element from the array
+                i--;
+            }
+        }
+
+        //remove any bullets and enemies that have gone offscreen or are inactive
         my.sprite.playerBullet = my.sprite.playerBullet.filter((bullet) => bullet.y > -(bullet.displayHeight/2));
         my.sprite.enemies = my.sprite.enemies.filter((enemy) => enemy.y > -(enemy.displayHeight/2));
         my.sprite.enemies = my.sprite.enemies.filter((enemy) => enemy.y < (config.height)+10);
-        my.sprite.enemies = my.sprite.enemies.filter((enemy) => enemy.isActive = true);
 
-                // Check for any bullets colliding with enemies
+        // Check for any bullets colliding with enemies
+        for (let i = 0; i < my.sprite.enemies.length; i++) {
+            const enemy = my.sprite.enemies[i];
+            for (let j = 0; j< my.sprite.playerBullet.length; j++) {
+                const bullet = my.sprite.playerBullet[j];
+                if (this.collides(enemy, bullet)) {
+                        // Remove the enemy from the enemies array
+                        my.sprite.enemies.splice(i, 1); // Remove the enemy at index i from the array
+                        // Destroy the enemy
+                        enemy.destroy();
+                        //destroy the bullet
+                        my.sprite.playerBullet.splice(j, 1);
+                        bullet.destroy();
+                        // Decrement i since we removed an element from the array
+                        i--;
+                }
+            }
+        }
+
+        //check for enemies and enemy bullets colliding with player
+        for (let i = 0; i < my.sprite.enemies.length; i++) {
+            const enemy = my.sprite.enemies[i];
+            if (this.collides(my.sprite.playerShip, enemy)) {
+                this.playerHealth-=1;
+                console.log(this.playerHealth);
+                // Remove the enemy from the enemies array
+                my.sprite.enemies.splice(i, 1); // Remove the enemy at index i from the array
+                // Destroy the enemy
+                enemy.destroy();
+                // Decrement i since we removed an element from the array
+                i--;
+            }
+        }
+
+        for (let i = 0; i < my.sprite.enemyBullet.length; i++) {
+            const bullet = my.sprite.enemyBullet[i];
+            if (this.collides(my.sprite.playerShip, bullet)) {
+                this.playerHealth-=1;
+                console.log("player health="+this.playerHealth);
+                // Remove the bullet from the array
+                my.sprite.enemyBullet.splice(i, 1); // Remove the enemy at index i from the array
+                // Destroy the bullet
+                bullet.destroy();
+                // Decrement i since we removed an element from the array
+                i--;
+            }
+        }
+
         for (const enemy of my.sprite.enemies) {
-            if (enemy.isActive) {  // Only consider active enemies
-                for (const bullet of my.sprite.playerBullet) {
-                    if (this.collides(enemy, bullet)) {
-                        // Move bullet and enemy offscreen; it will be deleted next update
-                        bullet.y = -100;
-                        enemy.stopFollow();
-                        enemy.isActive = false;  // Mark enemy as inactive
-                        enemy.visible = false;
-                        enemy.y = -100;
-                    }
+            //make certain attacking enemies shoot bullets
+            if (enemy.isAttacking && enemy.type != 1) {
+                //if enemy bullet cooldown has expired fire a bullet
+                if (this.enemyBulletCooldown<0) {
+                    my.sprite.bullet = this.add.sprite(enemy.x, enemy.y-(enemy.displayHeight/2), "spaceParts", "laserRed09.png");
+                    my.sprite.bullet.setScale(this.scale);
+                    my.sprite.enemyBullet.push(my.sprite.bullet);
+                    //reset bullet cooldown
+                    this.enemyBulletCooldown = 50;
                 }
             }
         }
 
         // Check if an enemy should attack
         if (this.enemyCooldown < 0) {
-            this.enemyCooldown = 150;
-            let enemy = my.sprite.enemies.find(e => !e.hasAttacked && e.isActive);  // Find an active, non-attacking enemy
+            this.enemyCooldown = 120;
+            let enemy = my.sprite.enemies.find(e => !e.hasAttacked);  // Find an active, non-attacking enemy
             if (enemy) {
                 enemy.isAttacking = true;
             }
@@ -260,7 +327,7 @@ class EarthInvasion extends Phaser.Scene {
 
         // Move attacking enemies along their path
         for (const enemy of my.sprite.enemies) {
-            if (enemy.isAttacking && !enemy.hasAttacked && enemy.isActive) {
+            if (enemy.isAttacking && !enemy.hasAttacked) {
                 enemy.hasAttacked = true;
                 //path for bottom row enemies
                 if (enemy.type == 3) {
@@ -272,7 +339,7 @@ class EarthInvasion extends Phaser.Scene {
                         from: 0,
                         to: 1,
                         delay: 0,
-                        duration: 3000,
+                        duration: 6000,
                         rotateToPath: true,
                         rotationOffset: -90
                     });
