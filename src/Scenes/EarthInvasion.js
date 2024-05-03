@@ -119,6 +119,7 @@ class EarthInvasion extends Phaser.Scene {
     }
 
     create() {
+
         let my = this.my;
         //set how much each image should be scaled 
         this.scale = .5;
@@ -190,6 +191,15 @@ class EarthInvasion extends Phaser.Scene {
             my.sprite.enemies.unshift(enemy);
         }
 
+        //write initial health
+        this.playerHealthString = this.add.text(20,config.height-30, "Ship Health = "+playerHealth,{ 
+            fontFamily: 'Times, serif' 
+        });
+        this.earthHealthString = this.add.text(650,config.height-30, "Earth Health = "+earthHealth,{ 
+            fontFamily: 'Times, serif' 
+        });
+        
+
         // Create keys
         this.left = this.input.keyboard.addKey("A");
         this.right = this.input.keyboard.addKey("D");
@@ -197,6 +207,18 @@ class EarthInvasion extends Phaser.Scene {
     }
 
     update() {
+        //if player loses
+        if (earthHealth==0 || playerHealth==0) {
+            this.add.text(config.width/2-200,config.height/2, "You Died Bruh The earth got fucked on",{ 
+                fontFamily: 'Times, serif',
+                fontSize: 25
+            });
+            this.add.text(config.width/2-100,config.height/2+100, "Level Reached = "+level,{ 
+                fontFamily: 'Times, serif',
+                fontSize: 25
+            });
+            this.scene.pause("earthInvasion");
+        }; 
         let my = this.my;
 
         //update cooldowns every tick
@@ -257,13 +279,13 @@ class EarthInvasion extends Phaser.Scene {
             const enemy = my.sprite.enemies[i];
             if (enemy.y>config.height) {
                 earthHealth-=1;
-                console.log("earth health="+earthHealth);
                 // Remove the enemy from the enemies array
                 my.sprite.enemies.splice(i, 1); // Remove the enemy at index i from the array
                 // Destroy the enemy
                 enemy.destroy();
                 // Decrement i since we removed an element from the array
                 i--;
+                this.earthHealthString.setText("Earth Health = "+earthHealth);
             }
         }
 
@@ -303,6 +325,8 @@ class EarthInvasion extends Phaser.Scene {
                 enemy.destroy();
                 // Decrement i since we removed an element from the array
                 i--;
+                //display new health
+                this.playerHealthString.setText("Ship Health = "+playerHealth);
             }
         }
 
@@ -318,6 +342,7 @@ class EarthInvasion extends Phaser.Scene {
                 bullet.destroy();
                 // Decrement i since we removed an element from the array
                 i--;
+                this.playerHealthString.setText("Ship Health = "+playerHealth);
             }
         }
 
