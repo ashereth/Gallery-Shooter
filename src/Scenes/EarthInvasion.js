@@ -1,7 +1,16 @@
 //health
-let playerHealth = 3;
+let playerHealth = 5;
 let earthHealth = 10;
 let level = 1;
+//function to restart game when spacebar is pressed
+function handleKeyDown(event) {
+    if (event.key === ' ') {
+        event.preventDefault()
+        document.removeEventListener('keydown', handleKeyDown); //Remove this event listener
+        window.location.reload(); //Reload the page
+    }
+}
+
 
 class EarthInvasion extends Phaser.Scene {
     constructor() {
@@ -159,7 +168,7 @@ class EarthInvasion extends Phaser.Scene {
         //make all enemies
         //  top row of enemies
         for (let i = 0; i < 10; i++) {
-            let enemy = this.add.follower(my.curve3, i*(config.width/10)+40, 30, "spaceParts", "enemyRed4.png").setScale(this.scale*.9);
+            let enemy = this.add.follower(my.curve3, i*(config.width/10)+40, 60, "spaceParts", "enemyRed4.png").setScale(this.scale*.9);
             enemy.isAttacking = false;
             enemy.hasAttacked = false;
             enemy.type = 3;
@@ -169,13 +178,13 @@ class EarthInvasion extends Phaser.Scene {
         for (let i = 0; i < 10; i++) {
             //for enemies on left side
             if (i<5) {
-                let enemy = this.add.follower(my.curve2Right,i*(config.width/10)+40, 80, "spaceParts", "enemyRed1.png").setScale(this.scale*.9);
+                let enemy = this.add.follower(my.curve2Right,i*(config.width/10)+40, 110, "spaceParts", "enemyRed1.png").setScale(this.scale*.9);
                 enemy.isAttacking = false;
                 enemy.hasAttacked = false;
                 enemy.type = 2;
                 my.sprite.enemies.unshift(enemy);
             }else {
-                let enemy = this.add.follower(my.curve2Left,i*(config.width/10)+40, 80, "spaceParts", "enemyRed1.png").setScale(this.scale*.9);
+                let enemy = this.add.follower(my.curve2Left,i*(config.width/10)+40, 110, "spaceParts", "enemyRed1.png").setScale(this.scale*.9);
                 enemy.isAttacking = false;
                 enemy.hasAttacked = false;
                 enemy.type = 2;
@@ -184,7 +193,7 @@ class EarthInvasion extends Phaser.Scene {
         }
         //  row 3 of enemies
         for (let i = 0; i < 10; i++) {
-            let enemy = this.add.follower(my.curve1,i*(config.width/10)+40, 130, "spaceParts", "enemyRed2.png").setScale(this.scale*.9);
+            let enemy = this.add.follower(my.curve1,i*(config.width/10)+40, 160, "spaceParts", "enemyRed2.png").setScale(this.scale*.9);
             enemy.isAttacking = false;
             enemy.hasAttacked = false;
             enemy.type = 1;
@@ -192,13 +201,16 @@ class EarthInvasion extends Phaser.Scene {
         }
 
         //write initial health
-        this.playerHealthString = this.add.text(20,config.height-30, "Ship Health = "+playerHealth,{ 
+        this.playerHealthString = this.add.text(20,10, "Ship Health = "+playerHealth,{ 
             fontFamily: 'Times, serif' 
         });
-        this.earthHealthString = this.add.text(650,config.height-30, "Earth Health = "+earthHealth,{ 
+        this.earthHealthString = this.add.text(650,10, "Earth Health = "+earthHealth,{ 
             fontFamily: 'Times, serif' 
         });
-        
+        //write level
+        this.levelString = this.add.text(config.width/2-50,10, "Current Level = "+level,{ 
+            fontFamily: 'Times, serif' 
+        });
 
         // Create keys
         this.left = this.input.keyboard.addKey("A");
@@ -209,15 +221,25 @@ class EarthInvasion extends Phaser.Scene {
     update() {
         //if player loses
         if (earthHealth==0 || playerHealth==0) {
-            this.add.text(config.width/2-200,config.height/2, "You Died Bruh The earth got fucked on",{ 
+            this.add.text(config.width/2-100,config.height/2, "You Died Valiantly",{ 
                 fontFamily: 'Times, serif',
                 fontSize: 25
             });
-            this.add.text(config.width/2-100,config.height/2+100, "Level Reached = "+level,{ 
+            this.add.text(config.width/2-200,config.height/2+50, "Hopefully the residents of earth can\ndefend against the rest of the invasion.",{ 
+                fontFamily: 'Times, serif',
+                fontSize: 25
+            });
+            this.add.text(config.width/2-100,config.height/2+130, "Level Reached = "+level,{ 
+                fontFamily: 'Times, serif',
+                fontSize: 25
+            });
+            
+            this.add.text(config.width/2-150,config.height/2+200, "Press Spacebar to Play Again!",{ 
                 fontFamily: 'Times, serif',
                 fontSize: 25
             });
             this.scene.pause("earthInvasion");
+            document.addEventListener('keydown', handleKeyDown);
         }; 
         let my = this.my;
 
@@ -233,6 +255,7 @@ class EarthInvasion extends Phaser.Scene {
                 //reset the paths so that the enemies follow the correct paths on restart
                 console.log("Level "+level+" complete!");
                 level+=1;
+                this.levelString.setText("Current Level = "+level);
                 this.resetPaths();
                 this.scene.restart();
             }
