@@ -11,5 +11,4 @@ let config = {
     scene: [EarthInvasion]
 }
 
-
 const game = new Phaser.Game(config);
