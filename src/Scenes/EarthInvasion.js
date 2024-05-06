@@ -31,7 +31,7 @@ class EarthInvasion extends Phaser.Scene {
         //paths for each enemy type
         this.resetPaths()
     }
-
+    //function to reset paths since they are changed each time a enemy starts moving
     resetPaths(){
         this.my.enemyPath1 = [
             716,97,
@@ -125,6 +125,11 @@ class EarthInvasion extends Phaser.Scene {
         this.load.atlasXML("spaceParts", "images/sheet.png", "images/sheet.xml");
         //load background
         this.load.image("background" ,"backgrounds/blue.png");
+        this.load.audio('playerShoot', 'sounds/sfx_laser1.ogg');
+        this.load.audio('enemyShoot', 'sounds/sfx_laser2.ogg');
+        this.load.audio('playerHit', 'sounds/sfx_shieldDown.ogg');
+        this.load.audio('enemyHit', 'sounds/sfx_zap.ogg');
+        this.load.audio('gameOver', 'sounds/sfx_lose.ogg');
     }
 
     create() {
@@ -221,6 +226,7 @@ class EarthInvasion extends Phaser.Scene {
     update() {
         //if player loses
         if (earthHealth==0 || playerHealth==0) {
+            this.sound.play('gameOver');
             this.add.text(config.width/2-100,config.height/2, "You Died Valiantly",{ 
                 fontFamily: 'Times, serif',
                 fontSize: 25
@@ -285,6 +291,7 @@ class EarthInvasion extends Phaser.Scene {
                 my.sprite.playerBullet.push(my.sprite.bullet);
                 //reset bullet cooldown
                 this.bulletCooldown = 10;
+                this.sound.play("playerShoot");
             }
         }
 
@@ -302,6 +309,7 @@ class EarthInvasion extends Phaser.Scene {
             const enemy = my.sprite.enemies[i];
             if (enemy.y>config.height) {
                 earthHealth-=1;
+                this.sound.play('playerHit');
                 // Remove the enemy from the enemies array
                 my.sprite.enemies.splice(i, 1); // Remove the enemy at index i from the array
                 // Destroy the enemy
@@ -332,6 +340,7 @@ class EarthInvasion extends Phaser.Scene {
                         bullet.destroy();
                         // Decrement i since we removed an element from the array
                         i--;
+                        this.sound.play('enemyHit');
                 }
             }
         }
@@ -350,6 +359,7 @@ class EarthInvasion extends Phaser.Scene {
                 i--;
                 //display new health
                 this.playerHealthString.setText("Ship Health = "+playerHealth);
+                this.sound.play('playerHit');
             }
         }
 
@@ -366,6 +376,7 @@ class EarthInvasion extends Phaser.Scene {
                 // Decrement i since we removed an element from the array
                 i--;
                 this.playerHealthString.setText("Ship Health = "+playerHealth);
+                this.sound.play('playerHit');
             }
         }
 
@@ -380,6 +391,7 @@ class EarthInvasion extends Phaser.Scene {
                     my.sprite.enemyBullet.push(my.sprite.bullet);
                     //reset bullet cooldown
                     this.enemyBulletCooldown = 50;
+                    this.sound.play('enemyShoot');
                 }
             }
         }
