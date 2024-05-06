@@ -7,4 +7,5 @@ You start with 5 ship health and 10 earth health.
 Anythime your ship gets hit you will take one ship damage and  
 anytime a ship gets passed you and makes it off screen you take one earth damage.
 
+[Here](https://ashereth.github.io/Gallery-Shooter/) is a link to the playable game website.  
 I hope you enjoy :).
