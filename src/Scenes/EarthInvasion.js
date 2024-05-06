@@ -130,6 +130,7 @@ class EarthInvasion extends Phaser.Scene {
         this.load.audio('playerHit', 'sounds/sfx_shieldDown.ogg');
         this.load.audio('enemyHit', 'sounds/sfx_zap.ogg');
         this.load.audio('gameOver', 'sounds/sfx_lose.ogg');
+        this.load.audio('nextLevel', 'sounds/sfx_shieldUp.ogg');
     }
 
     create() {
@@ -262,6 +263,7 @@ class EarthInvasion extends Phaser.Scene {
                 console.log("Level "+level+" complete!");
                 level+=1;
                 this.levelString.setText("Current Level = "+level);
+                this.sound.play('nextLevel');
                 this.resetPaths();
                 this.scene.restart();
             }
